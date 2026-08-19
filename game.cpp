@@ -3,7 +3,6 @@
 #include <SDL3/SDL.h>
 #include "constants.h"
 
-
 bool Game::init(){
     if(!SDL_Init(SDL_INIT_VIDEO)){
         SDL_Log("SDL_Init failed: %s", SDL_GetError());

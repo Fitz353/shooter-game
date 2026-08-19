@@ -25,6 +25,7 @@ public:
     Player();
     void handleInput(const bool* keys, float dt);
     void render(SDL_Renderer* renderer);
+    void keepBounds();
 };
 
 class Game{
@@ -97,7 +98,7 @@ void Game::run(){
 
         const bool* keys = SDL_GetKeyboardState(NULL);
         player.handleInput(keys, dt);
-
+        player.keepBounds();
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
@@ -126,7 +127,6 @@ void Player::handleInput(const bool* keys, float dt){
     if(keys[SDL_SCANCODE_DOWN]){
         y+=speed * dt;
     }
-    SDL_Log("x = %.1f, y = %1.f", x, y);
 }
 
 void Player::render(SDL_Renderer* renderer){
@@ -134,3 +134,22 @@ void Player::render(SDL_Renderer* renderer){
     SDL_SetRenderDrawColor(renderer, 0, 200, 255, 255);
     SDL_RenderFillRect(renderer, &rect);
     }
+
+void Player::keepBounds(){
+    // By SDL  convention, x and y represent the left-upper corner of the rectangle, so the right and up edges definitions are correct
+    // Also, keep in mind that the X axis works as usual, but the Y axis in reversed in computer graphics, so it grows downwards
+    float right_edge = x + w;
+    float up_edge = y + h;
+    if(x<0){
+        x = 0;
+    }
+    if(right_edge > WIDTH){
+        x = WIDTH - w;
+    }
+    if(y<0){
+        y = 0;
+    }
+    if(up_edge>HEIGHT){
+        y = HEIGHT - h;
+    }
+}

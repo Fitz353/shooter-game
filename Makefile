@@ -1,3 +1,16 @@
-main:
-	g++ main.cpp -o main.exe $(shell pkg-config --cflags --libs sdl3) -mconsole
-	./main.exe
+CXX = g++
+CXXFLAGS = -Wall -IC:/msys64/ucrt64/include
+LDFLAGS = -LC:/msys64/ucrt64/lib -lSDL3 -mwindows -mconsole
+SRCS = main.cpp game.cpp player.cpp bullet.cpp
+TARGET = main.exe
+
+$(TARGET): $(SRCS)
+	$(CXX) $(CXXFLAGS) $(SRCS) -o $(TARGET) $(LDFLAGS)
+
+run: $(TARGET)
+	./$(TARGET)
+
+clean:
+	del $(TARGET)
+
+.PHONY: run clean

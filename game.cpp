@@ -1,7 +1,9 @@
 #include "game.h"
 #include <iostream>
 #include <SDL3/SDL.h>
+#include "bullet.h"
 #include "constants.h"
+
 
 bool Game::init(){
     if(!SDL_Init(SDL_INIT_VIDEO)){
@@ -41,10 +43,24 @@ void Game::run(){
         player.handleInput(keys, dt);
         player.keepBounds();
 
+        if(player.wantstoshoot(keys, dt)){
+            bullets.push_back(Bullet(player.getCenter(), player.getTop()));
+        }
+
+        for(Bullet& b : bullets){
+            b.update(dt);
+        }
+        std::erase_if(bullets, [](const Bullet& b){ return !b.isAlive(); });
+
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
 
         player.render(renderer);
+
+        for(Bullet& b: bullets){
+            b.render(renderer);
+        }
+
 
         SDL_RenderPresent(renderer);
     }

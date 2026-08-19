@@ -1,5 +1,6 @@
 #include "player.h"
 #include "constants.h"
+#include <SDL3/SDL_scancode.h>
 #include <iostream>
 #include <SDL3/SDL.h>
 
@@ -45,4 +46,22 @@ void Player::keepBounds(){
     if( y + h>HEIGHT){
         y = HEIGHT - h;
     }
+}
+
+bool Player::wantstoshoot(const bool* keys, float dt){
+    shoot_cooldown-=dt;
+    if(keys[SDL_SCANCODE_SPACE] && shoot_cooldown <=0.f){
+        shoot_cooldown = shoot_delay;
+        return true;
+    }
+    return false;
+}
+
+// Returns the middle
+float Player::getCenter() const{
+    return x + w/2.f;
+}
+
+float Player::getTop() const{
+    return y;
 }

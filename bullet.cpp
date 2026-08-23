@@ -1,10 +1,10 @@
 #include "bullet.h"
-#include <iostream>
+#include "entity.h"
 #include <SDL3/SDL.h>
 
-Bullet:: Bullet(float startx, float starty){
-    x = startx;
-    y = starty;
+Bullet:: Bullet(float startx, float starty)
+    : Entity(startx, starty, 4.f, 12.f)
+{
 }
 
 void Bullet::update(float dt){

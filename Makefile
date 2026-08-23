@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++20 -IC:/msys64/ucrt64/include
 LDFLAGS = -LC:/msys64/ucrt64/lib -lSDL3 -mwindows -mconsole
-SRCS = main.cpp game.cpp player.cpp bullet.cpp
+SRCS = main.cpp game.cpp player.cpp bullet.cpp entity.cpp
 TARGET = main.exe
 
 $(TARGET): $(SRCS)

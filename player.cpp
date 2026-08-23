@@ -4,23 +4,24 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 
-//Constructor
-Player:: Player(){
-    x = WIDTH/2.f - w/2.f;
-    y = HEIGHT - h - 20.f;
+//Constructor ; parameter width, parameter height
+Player:: Player(float pw, float ph)
+    : Entity(WIDTH/2.f - pw/2.f, HEIGHT - ph - 20.f, pw, ph)
+{
 }
 
 void Player::handleInput(const bool* keys, float dt){
-    if(keys[SDL_SCANCODE_LEFT]){
+    //Moves to arrow keys and wasd
+    if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
         x-=speed * dt;
     }
-    if(keys[SDL_SCANCODE_RIGHT]){
+    if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
         x+=speed * dt;
     }
-    if(keys[SDL_SCANCODE_UP]){
+    if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
         y-=speed * dt;
     }
-    if(keys[SDL_SCANCODE_DOWN]){
+    if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
         y+=speed * dt;
     }
 }
@@ -63,5 +64,6 @@ float Player::getCenter() const{
 }
 
 float Player::getTop() const{
-    return y;
+    //12.f is the height of the bullet, so we did this so the bullet spawns right at the edge of the player
+    return y - 12.f;
 }

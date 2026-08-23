@@ -1,4 +1,5 @@
 #include "game.h"
+#include <cstdint>
 #include <iostream>
 #include <SDL3/SDL.h>
 #include "bullet.h"
@@ -40,16 +41,21 @@ void Game::run(){
         }
 
         const bool* keys = SDL_GetKeyboardState(NULL);
+        // Player methods
         player.handleInput(keys, dt);
         player.keepBounds();
 
+        // Put bullets in vector
         if(player.wantstoshoot(keys, dt)){
+            // Bullets methods, this is a vector of bullets
             bullets.push_back(Bullet(player.getCenter(), player.getTop()));
         }
 
+        // Update the location of the bullets from the vector
         for(Bullet& b : bullets){
             b.update(dt);
         }
+        // Delete the bullets when they go off screen from the vector
         std::erase_if(bullets, [](const Bullet& b){ return !b.isAlive(); });
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);

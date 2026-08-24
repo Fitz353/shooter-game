@@ -4,16 +4,9 @@
 #include "headers/constants.h"
 
 Enemy::Enemy(float startx, float starty, float w, float h,
-             float speed, int hp, Uint8 r, Uint8 g, Uint8 b)
-    : Entity(startx, starty, w, h), speed(speed), hp(hp), r(r), g(g), b(b)
+             float speed, int hp)
+    : Entity(startx, starty, w, h), speed(speed), hp(hp)
 {
-}
-
-void Enemy::render(SDL_Renderer *renderer)
-{
-    SDL_FRect rect = {x, y, w, h};
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    SDL_RenderFillRect(renderer, &rect);
 }
 
 void Enemy::damage(int amount)
@@ -32,12 +25,13 @@ bool Enemy::offScreen() const
 
 // --- Grunt: straight down, dies in one hit ---
 Grunt::Grunt(float startx, float starty)
-    : Enemy(startx, starty, 40.f, 40.f, 50.f, 1, 200, 0, 156)
+    : Enemy(startx, starty, 48.f, 48.f, 50.f, 1)
 {
 }
 
 void Grunt::update(float dt)
 {
+    advanceAnim(dt);
     y += speed * dt;
     if (offScreen())
     {
@@ -47,12 +41,13 @@ void Grunt::update(float dt)
 
 // --- Tank: big, slow, takes three hits ---
 Tank::Tank(float startx, float starty)
-    : Enemy(startx, starty, 70.f, 70.f, 25.f, 3, 220, 80, 40)
+    : Enemy(startx, starty, 64.f, 64.f, 25.f, 3)
 {
 }
 
 void Tank::update(float dt)
 {
+    advanceAnim(dt);
     y += speed * dt;
     if (offScreen())
     {
@@ -62,12 +57,13 @@ void Tank::update(float dt)
 
 // --- Zigzagger: sine-wave horizontal drift ---
 Zigzagger::Zigzagger(float startx, float starty)
-    : Enemy(startx, starty, 30.f, 30.f, 90.f, 1, 60, 220, 120), baseX(startx)
+    : Enemy(startx, starty, 32.f, 32.f, 90.f, 1), baseX(startx)
 {
 }
 
 void Zigzagger::update(float dt)
 {
+    advanceAnim(dt);
     t += dt;
     y += speed * dt;
     x = baseX + SDL_sinf(t * FREQUENCY) * AMPLITUDE;
@@ -77,17 +73,26 @@ void Zigzagger::update(float dt)
     }
 }
 
-std::unique_ptr<Enemy> spawnRandomEnemy()
+std::unique_ptr<Enemy> spawnRandomEnemy(const Assets &a)
 {
+    std::unique_ptr<Enemy> e;
     switch (SDL_rand(3))
     {
     case 0:
-        return std::make_unique<Grunt>((float)SDL_rand(WIDTH - 40), -40.f);
+        e = std::make_unique<Grunt>((float)SDL_rand(WIDTH - 48), -48.f);
+        e->setSprite(a.grunt, 16, 16, 6);
+        break;
     case 1:
-        return std::make_unique<Tank>((float)SDL_rand(WIDTH - 70), -70.f);
+        e = std::make_unique<Tank>((float)SDL_rand(WIDTH - 64), -64.f);
+        e->setSprite(a.tank, 16, 16, 4);
+        break;
     default:
-        // keep baseX inset so the sine swing stays on screen
-        return std::make_unique<Zigzagger>(
-            Zigzagger::AMPLITUDE + (float)SDL_rand(WIDTH - 30 - 2 * (int)Zigzagger::AMPLITUDE), -30.f);
+        e = std::make_unique<Zigzagger>(
+            Zigzagger::AMPLITUDE +
+                (float)SDL_rand(WIDTH - 32 - 2 * (int)Zigzagger::AMPLITUDE),
+            -32.f);
+        e->setSprite(a.zigzag, 16, 16, 5);
+        break;
     }
+    return e;
 }

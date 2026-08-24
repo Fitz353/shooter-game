@@ -24,6 +24,11 @@ bool Game::init()
     }
     SDL_SetRenderVSync(renderer, 1);
     SDL_srand(0);
+    if (!assets.load(renderer))
+    {
+        return false;
+    }
+    player.setSprite(assets.player, 16, 16, 3, 1);
     return true;
 }
 
@@ -44,13 +49,19 @@ void Game::run()
         }
         lastTick = now;
 
+        bg_scroll += 40.f * dt;
+        if (bg_scroll >= 64.f * BG_SCALE)
+        {
+            bg_scroll -= 64.f * BG_SCALE;
+        }
+
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
             {
                 running = false;
             }
-            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_R && current == GameState::GAME_OVER)
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_RETURN && current != GameState::PLAYING)
             {
                 reset();
             }
@@ -64,7 +75,7 @@ void Game::run()
             {
                 spawn_timer = spawn_delay;
                 // For pseudo random spawning of the enemies on the top of the map, and at the top
-                enemies.push_back(spawnRandomEnemy());
+                enemies.push_back(spawnRandomEnemy(assets));
             }
 
             const bool *keys = SDL_GetKeyboardState(NULL);
@@ -76,13 +87,18 @@ void Game::run()
             if (player.wantstoshoot(keys, dt))
             {
                 // Bullets methods, this is a vector of bullets
-                bullets.push_back(Bullet(player.getCenter(), player.getTop()));
+                bullets.push_back(Bullet(player.getCenter(), player.getTop(), assets.bullet));
             }
 
             // Update the location of the bullets from the vector
             for (Bullet &b : bullets)
             {
                 b.update(dt);
+            }
+
+            for (Effect &f : effects)
+            {
+                f.update(dt);
             }
 
             for (auto &e : enemies)
@@ -104,7 +120,10 @@ void Game::run()
                         if (!e->isAlive())
                         {
                             score++;
-                            SDL_Log("Score: %d", score);
+                            SDL_FRect r = e->getRect();
+                            effects.push_back(Effect(r.x + r.w / 2.f,
+                                                     r.y + r.h / 2.f,
+                                                     assets.explosion));
                         }
                         break;
                     }
@@ -128,17 +147,19 @@ void Game::run()
                           { return !b.isAlive(); });
             std::erase_if(enemies, [](const std::unique_ptr<Enemy> &e)
                           { return !e->isAlive(); });
+            std::erase_if(effects, [](const Effect &f)
+                          { return !f.isAlive(); });
         }
 
-        if (current == GameState::GAME_OVER)
-        {
-            SDL_SetRenderDrawColor(renderer, 60, 15, 20, 255);
-        }
-        else
-        {
-            SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
-        }
+        SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
+
+        renderBackground();
+
+        if (current == GameState::MENU)
+        {
+            drawCentered(assets.start, 48.f, 8.f, HEIGHT / 2.f - 16.f, 4.f);
+        }
 
         player.render(renderer);
 
@@ -150,12 +171,29 @@ void Game::run()
         {
             e->render(renderer);
         }
+        for (Effect &f : effects)
+        {
+            f.render(renderer);
+        }
+        drawNumber(score, 16.f, 16.f, 3.f);
+
+        if (current == GameState::GAME_OVER)
+        {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 120, 0, 0, 110);
+            SDL_FRect full = {0, 0, WIDTH, HEIGHT};
+            SDL_RenderFillRect(renderer, &full);
+
+            drawCentered(assets.gameover, 72.f, 8.f, HEIGHT / 2.f - 60.f, 4.f);
+            drawNumber(score, WIDTH / 2.f - 36.f, HEIGHT / 2.f + 10.f, 6.f);
+        }
 
         SDL_RenderPresent(renderer);
     }
 }
 void Game::cleanup()
 {
+    assets.destroy();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -164,9 +202,54 @@ void Game::cleanup()
 void Game::reset()
 {
     bullets.clear();
+    effects.clear();
     enemies.clear();
     score = 0;
     spawn_timer = 0.f;
     player = Player();
+    player.setSprite(assets.player, 16, 16, 3, 1);
     current = GameState::PLAYING;
+}
+
+void Game::renderBackground()
+{
+    const float tile = 64.f * BG_SCALE;
+    SDL_FRect src = {0.f, 0.f, 64.f, 64.f}; // frame 0 of the 2-frame sheet
+
+    int cols = (int)(WIDTH / tile) + 1;
+    int rows = (int)(HEIGHT / tile) + 2;
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int col = 0; col < cols; col++)
+        {
+            SDL_FRect dst = {col * tile,
+                             row * tile - tile + bg_scroll,
+                             tile, tile};
+            SDL_RenderTexture(renderer, assets.background, &src, &dst);
+        }
+    }
+}
+
+void Game::drawNumber(int value, float x, float y, float scale)
+{
+    char buf[16];
+    SDL_snprintf(buf, sizeof(buf), "%d", value);
+
+    float gw = 8.f * scale;
+    for (int i = 0; buf[i] != '\0'; i++)
+    {
+        int d = buf[i] - '0';
+        int gi = (d == 0) ? 9 : d - 1;
+        SDL_FRect src = {(float)((gi % 5) * 8), (float)((gi / 5) * 8), 8.f, 8.f};
+        SDL_FRect dst = {x + i * gw, y, gw, gw};
+        SDL_RenderTexture(renderer, assets.font, &src, &dst);
+    }
+}
+
+void Game::drawCentered(SDL_Texture *t, float srcw, float srch, float y, float scale)
+{
+    SDL_FRect src = {0.f, 0.f, srcw, srch};
+    SDL_FRect dst = {(WIDTH - srcw * scale) / 2.f, y, srcw * scale, srch * scale};
+    SDL_RenderTexture(renderer, t, &src, &dst);
 }

@@ -13,11 +13,10 @@ class Player : public Entity
 
 public:
     // Constructor cannot have a return type
-    Player(float pw = 40.f, float ph = 40.f);
+    Player(float pw = 48.f, float ph = 48.f);
     float getCenter() const;
     float getTop() const;
     void handleInput(const bool *keys, float dt);
-    void render(SDL_Renderer *renderer) override;
     void keepBounds();
     bool wantstoshoot(const bool *keys, float dt);
 };

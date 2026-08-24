@@ -6,6 +6,8 @@
 #include "bullet.h"
 #include "enemy.h"
 #include <vector>
+#include "assets.h"
+#include "effect.h"
 
 enum class GameState
 {
@@ -23,12 +25,18 @@ class Game
   Player player;
   std::vector<Bullet> bullets;
   std::vector<std::unique_ptr<Enemy>> enemies;
+  std::vector<Effect> effects;
   float spawn_timer = 0.f;
   float spawn_delay = 1.0f;
-  GameState current = GameState::PLAYING;
+  GameState current = GameState::MENU;
   int score = 0;
   void reset();
-
+  void renderBackground();
+  void drawNumber(int value, float x, float y, float scale);
+  void drawCentered(SDL_Texture *t, float srcw, float srch, float y, float scale);
+  Assets assets;
+  float bg_scroll = 0.f;
+  static constexpr float BG_SCALE = 3.f;
 
 public:
   // function for init of window, renderer and video systems

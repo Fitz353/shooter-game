@@ -2,21 +2,19 @@
 #include <SDL3/SDL.h>
 #include <memory>
 #include "entity.h"
+#include "assets.h"
 
 class Enemy : public Entity
 {
 protected:
     float speed;
     int hp;
-    Uint8 r, g, b;
 
 public:
     Enemy(float startx, float starty, float w, float h,
-          float speed, int hp, Uint8 r, Uint8 g, Uint8 b);
+          float speed, int hp);
 
     virtual void update(float dt) = 0;
-    void render(SDL_Renderer *renderer) override;
-
     void damage(int amount);
     bool offScreen() const;
 };
@@ -48,4 +46,4 @@ public:
     void update(float dt) override;
 };
 
-std::unique_ptr<Enemy> spawnRandomEnemy();
+std::unique_ptr<Enemy> spawnRandomEnemy(const Assets &a);

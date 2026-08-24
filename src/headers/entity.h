@@ -7,12 +7,20 @@ protected:
     float x, y;
     float w, h;
     bool alive = true;
+    SDL_Texture *tex = nullptr; // borrowed, never destroyed here
+    int frame_w = 0, frame_h = 0;
+    int frame_count = 1;
+    int frame = 0;
+    float anim_timer = 0.f;
+    float anim_fps = 8.f;
 
 public:
     Entity(float startx, float starty, float w, float h);
     virtual ~Entity() = default;
 
-    virtual void render(SDL_Renderer* renderer) = 0;
+    virtual void render(SDL_Renderer *renderer);
+    void setSprite(SDL_Texture *t, int fw, int fh, int count, int startFrame = 0);
+    void advanceAnim(float dt);
 
     SDL_FRect getRect() const { return {x, y, w, h}; }
     void kill() { alive = false; }

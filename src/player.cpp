@@ -11,14 +11,16 @@ Player::Player(float pw, float ph)
 
 void Player::handleInput(const bool *keys, float dt)
 {
-    // Moves to arrow keys and wasd
+    frame = 1; // neutral
     if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A])
     {
         x -= speed * dt;
+        frame = 0;
     }
     if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D])
     {
         x += speed * dt;
+        frame = 2;
     }
     if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
     {
@@ -28,13 +30,6 @@ void Player::handleInput(const bool *keys, float dt)
     {
         y += speed * dt;
     }
-}
-
-void Player::render(SDL_Renderer *renderer)
-{
-    SDL_FRect rect = {x, y, w, h};
-    SDL_SetRenderDrawColor(renderer, 0, 200, 255, 255);
-    SDL_RenderFillRect(renderer, &rect);
 }
 
 void Player::keepBounds()

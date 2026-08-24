@@ -5,7 +5,7 @@ OBJ_DIR  = build
 TARGET   = main.exe
 
 CXXFLAGS = -Wall -std=c++20 -I$(INC_DIR) -IC:/msys64/ucrt64/include -MMD -MP
-LDFLAGS  = -LC:/msys64/ucrt64/lib -lSDL3 -mwindows -mconsole
+LDFLAGS  = -LC:/msys64/ucrt64/lib -lSDL3_image -lSDL3 -mwindows -mconsole
 
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))

@@ -10,6 +10,10 @@ protected:
 
 public:
     Entity(float startx, float starty, float w, float h);
+    virtual ~Entity() = default;
+
+    virtual void render(SDL_Renderer* renderer) = 0;
+
     SDL_FRect getRect() const { return {x, y, w, h}; }
     void kill() { alive = false; }
     bool isAlive() const { return alive; }

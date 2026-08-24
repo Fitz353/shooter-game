@@ -17,7 +17,7 @@ public:
     float getCenter() const;
     float getTop() const;
     void handleInput(const bool *keys, float dt);
-    void render(SDL_Renderer *renderer);
+    void render(SDL_Renderer *renderer) override;
     void keepBounds();
     bool wantstoshoot(const bool *keys, float dt);
 };

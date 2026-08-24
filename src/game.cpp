@@ -44,66 +44,100 @@ void Game::run()
         }
         lastTick = now;
 
-        // Timer starts gets initialized at 0
-        spawn_timer -= dt;
-        if (spawn_timer <= 0.f)
-        {
-            spawn_timer = spawn_delay;
-            // For pseudo random spawning of the enemies on the top of the map, and at the top
-            float ex = (float)SDL_rand(WIDTH - 40);
-            enemies.push_back(Enemy(ex, -40.f));
-        }
-
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
             {
                 running = false;
             }
-        }
-
-        const bool *keys = SDL_GetKeyboardState(NULL);
-        // Player methods
-        player.handleInput(keys, dt);
-        player.keepBounds();
-
-        // Put bullets in vector
-        if (player.wantstoshoot(keys, dt))
-        {
-            // Bullets methods, this is a vector of bullets
-            bullets.push_back(Bullet(player.getCenter(), player.getTop()));
-        }
-
-        // Update the location of the bullets from the vector
-        for (Bullet &b : bullets)
-        {
-            b.update(dt);
-        }
-
-        for (Enemy &e : enemies)
-        {
-            e.update(dt);
-        }
-        for (Bullet &b : bullets)
-        {
-            SDL_FRect br = b.getRect();
-            for (Enemy &e : enemies)
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_R && current == GameState::GAME_OVER)
             {
-                SDL_FRect er = e.getRect();
-                if (SDL_HasRectIntersectionFloat(&br, &er))
+                reset();
+            }
+        }
+
+        if (current == GameState::PLAYING)
+        {
+            // Timer starts gets initialized at 0
+            spawn_timer -= dt;
+            if (spawn_timer <= 0.f)
+            {
+                spawn_timer = spawn_delay;
+                // For pseudo random spawning of the enemies on the top of the map, and at the top
+                enemies.push_back(spawnRandomEnemy());
+            }
+
+            const bool *keys = SDL_GetKeyboardState(NULL);
+            // Player methods
+            player.handleInput(keys, dt);
+            player.keepBounds();
+
+            // Put bullets in vector
+            if (player.wantstoshoot(keys, dt))
+            {
+                // Bullets methods, this is a vector of bullets
+                bullets.push_back(Bullet(player.getCenter(), player.getTop()));
+            }
+
+            // Update the location of the bullets from the vector
+            for (Bullet &b : bullets)
+            {
+                b.update(dt);
+            }
+
+            for (auto &e : enemies)
+            {
+                e->update(dt);
+            }
+            for (Bullet &b : bullets)
+            {
+                SDL_FRect br = b.getRect();
+                for (auto &e : enemies)
                 {
-                    b.kill();
-                    e.kill();
+                    if (!e->isAlive())
+                        continue;
+                    SDL_FRect er = e->getRect();
+                    if (SDL_HasRectIntersectionFloat(&br, &er))
+                    {
+                        b.kill();
+                        e->damage(1);
+                        if (!e->isAlive())
+                        {
+                            score++;
+                            SDL_Log("Score: %d", score);
+                        }
+                        break;
+                    }
+                }
+            }
+            SDL_FRect pr = player.getRect();
+            for (auto &e : enemies)
+            {
+                if (!e->isAlive())
+                    continue;
+                SDL_FRect er = e->getRect();
+                if (SDL_HasRectIntersectionFloat(&pr, &er))
+                {
+                    e->kill();
+                    current = GameState::GAME_OVER;
                     break;
                 }
             }
-        }
-        std::erase_if(bullets, [](const Bullet &b)
-                      { return !b.isAlive(); });
-        std::erase_if(enemies, [](const Enemy &e)
-                      { return !e.isAlive(); });
 
-        SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
+            std::erase_if(bullets, [](const Bullet &b)
+                          { return !b.isAlive(); });
+            std::erase_if(enemies, [](const std::unique_ptr<Enemy> &e)
+                          { return !e->isAlive(); });
+        }
+
+        if (current == GameState::GAME_OVER)
+        {
+            SDL_SetRenderDrawColor(renderer, 60, 15, 20, 255);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
+        }
         SDL_RenderClear(renderer);
 
         player.render(renderer);
@@ -112,9 +146,9 @@ void Game::run()
         {
             b.render(renderer);
         }
-        for (Enemy &e : enemies)
+        for (auto &e : enemies)
         {
-            e.render(renderer);
+            e->render(renderer);
         }
 
         SDL_RenderPresent(renderer);
@@ -125,4 +159,14 @@ void Game::cleanup()
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+void Game::reset()
+{
+    bullets.clear();
+    enemies.clear();
+    score = 0;
+    spawn_timer = 0.f;
+    player = Player();
+    current = GameState::PLAYING;
 }

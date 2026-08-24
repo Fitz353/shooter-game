@@ -11,5 +11,5 @@ class Bullet : public Entity
 public:
     Bullet(float startx, float starty);
     void update(float dt);
-    void render(SDL_Renderer *renderer);
+    void render(SDL_Renderer *renderer) override;
 };

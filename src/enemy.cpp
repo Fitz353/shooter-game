@@ -96,3 +96,14 @@ std::unique_ptr<Enemy> spawnRandomEnemy(const Assets &a)
     }
     return e;
 }
+
+bool Tank::wantsToShoot(float dt)
+{
+    shoot_cooldown -= dt;
+    if (shoot_cooldown <= 0.f)
+    {
+        shoot_cooldown = SHOOT_DELAY;
+        return true;
+    }
+    return false;
+}

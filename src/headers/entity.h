@@ -23,6 +23,12 @@ public:
     void advanceAnim(float dt);
 
     SDL_FRect getRect() const { return {x, y, w, h}; }
+    SDL_FRect getHitbox() const
+    {
+        float ix = w * 0.25f;
+        float iy = h * 0.25f;
+        return {x + ix, y + iy, w - 2 * ix, h - 2 * iy};
+    }
     void kill() { alive = false; }
     bool isAlive() const { return alive; }
 };

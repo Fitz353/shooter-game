@@ -6,9 +6,9 @@ class Bullet : public Entity
 {
     static constexpr float BW = 16.f;
     static constexpr float BH = 16.f;
-    float speed = 600.f;
+    float vy;
 
 public:
-    Bullet(float startx, float starty, SDL_Texture* t);
+    Bullet(float cx, float cy, SDL_Texture *t, float vy, int frames = 1);
     void update(float dt);
 };

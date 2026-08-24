@@ -25,9 +25,11 @@ bool Assets::load(SDL_Renderer *renderer)
     gameover = loadOne(renderer, "assets/gameover.png");
     start = loadOne(renderer, "assets/start.png");
     explosion = loadOne(renderer, "assets/explosion.png");
+    life = loadOne(renderer, "assets/life.png");
+    enemybullet = loadOne(renderer, "assets/enemybullet.png");
 
     return player && bullet && grunt && tank && zigzag && background &&
-           font && gameover && start && explosion;
+           font && gameover && start && explosion && life && enemybullet;
 }
 
 void Assets::destroy()
@@ -41,4 +43,7 @@ void Assets::destroy()
     SDL_DestroyTexture(font);
     SDL_DestroyTexture(gameover);
     SDL_DestroyTexture(start);
+    SDL_DestroyTexture(explosion);
+    SDL_DestroyTexture(life);
+    SDL_DestroyTexture(enemybullet);
 }

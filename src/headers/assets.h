@@ -13,6 +13,8 @@ struct Assets
     SDL_Texture *gameover = nullptr;
     SDL_Texture *start = nullptr;
     SDL_Texture *explosion = nullptr;
+    SDL_Texture *life = nullptr;
+    SDL_Texture *enemybullet = nullptr;
 
     bool load(SDL_Renderer *renderer);
     void destroy();

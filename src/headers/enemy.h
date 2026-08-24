@@ -14,6 +14,11 @@ public:
     Enemy(float startx, float starty, float w, float h,
           float speed, int hp);
 
+    virtual bool wantsToShoot(float dt)
+    {
+        (void)dt;
+        return false;
+    }
     virtual void update(float dt) = 0;
     void damage(int amount);
     bool offScreen() const;
@@ -28,9 +33,13 @@ public:
 
 class Tank : public Enemy
 {
+    float shoot_cooldown = 1.5f;
+    static constexpr float SHOOT_DELAY = 2.0f;
+
 public:
     Tank(float startx, float starty);
     void update(float dt) override;
+    bool wantsToShoot(float dt) override;
 };
 
 class Zigzagger : public Enemy

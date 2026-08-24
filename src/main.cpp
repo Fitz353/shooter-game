@@ -1,14 +1,16 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include "game.h"
+#include "headers/game.h"
 
-int main(int argc, char* argv[]){
+int main(int argc, char *argv[])
+{
     // For no warning when compiling
-    (void) argc;
-    (void) argv;
+    (void)argc;
+    (void)argv;
 
     Game game;
-    if(!game.init()){
+    if (!game.init())
+    {
         return 1;
     }
     game.run();

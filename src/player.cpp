@@ -1,57 +1,69 @@
-#include "player.h"
-#include "constants.h"
+#include "headers/player.h"
+#include "headers/constants.h"
 #include <SDL3/SDL_scancode.h>
-#include <iostream>
 #include <SDL3/SDL.h>
 
-//Constructor ; parameter width, parameter height
-Player:: Player(float pw, float ph)
-    : Entity(WIDTH/2.f - pw/2.f, HEIGHT - ph - 20.f, pw, ph)
+// Constructor ; parameter width, parameter height
+Player::Player(float pw, float ph)
+    : Entity(WIDTH / 2.f - pw / 2.f, HEIGHT - ph - 20.f, pw, ph)
 {
 }
 
-void Player::handleInput(const bool* keys, float dt){
-    //Moves to arrow keys and wasd
-    if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
-        x-=speed * dt;
+void Player::handleInput(const bool *keys, float dt)
+{
+    // Moves to arrow keys and wasd
+    if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A])
+    {
+        x -= speed * dt;
     }
-    if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
-        x+=speed * dt;
+    if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D])
+    {
+        x += speed * dt;
     }
-    if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
-        y-=speed * dt;
+    if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
+    {
+        y -= speed * dt;
     }
-    if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
-        y+=speed * dt;
+    if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S])
+    {
+        y += speed * dt;
     }
 }
 
-void Player::render(SDL_Renderer* renderer){
+void Player::render(SDL_Renderer *renderer)
+{
     SDL_FRect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(renderer, 0, 200, 255, 255);
     SDL_RenderFillRect(renderer, &rect);
-    }
+}
 
-void Player::keepBounds(){
+void Player::keepBounds()
+{
     // By SDL  convention, x and y represent the left-upper corner of the rectangle, so the right and up edges definitions are correct
     // Also, keep in mind that the X axis works as usual, but the Y axis in reversed in computer graphics, so it grows downwards
-    if(x<0){
+    if (x < 0)
+    {
         x = 0;
     }
-    if(x+ w > WIDTH){
+    if (x + w > WIDTH)
+    {
         x = WIDTH - w;
     }
-    if(y<0){
+    if (y < 0)
+    {
         y = 0;
     }
-    if( y + h>HEIGHT){
+    if (y + h > HEIGHT)
+    {
         y = HEIGHT - h;
     }
 }
 
-bool Player::wantstoshoot(const bool* keys, float dt){
-    shoot_cooldown-=dt;
-    if(keys[SDL_SCANCODE_SPACE] && shoot_cooldown <=0.f){
+bool Player::wantstoshoot(const bool *keys, float dt)
+{
+    shoot_cooldown -= dt;
+    if (keys[SDL_SCANCODE_SPACE] && shoot_cooldown <= 0.f)
+    {
         shoot_cooldown = shoot_delay;
         return true;
     }
@@ -59,11 +71,12 @@ bool Player::wantstoshoot(const bool* keys, float dt){
 }
 
 // Returns the middle
-float Player::getCenter() const{
-    return x + w/2.f;
+float Player::getCenter() const
+{
+    return x + w / 2.f;
 }
 
-float Player::getTop() const{
-    //12.f is the height of the bullet, so we did this so the bullet spawns right at the edge of the player
-    return y - 12.f;
+float Player::getTop() const
+{
+    return y;
 }
